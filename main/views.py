@@ -4,6 +4,9 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login as auth_login
 from django.contrib import messages
+from django.contrib.auth.views import LoginView
+from django import forms
+from django.contrib.auth.forms import AuthenticationForm
 
 from .models import playlist_user
 from django.urls.base import reverse
@@ -11,7 +14,6 @@ from django.contrib.auth import authenticate,login,logout
 from youtube_search import YoutubeSearch
 import json
 # import cardupdate
-
 
 
 f = open('card.json', 'r')
@@ -65,7 +67,6 @@ def search(request):
   return render(request, 'search.html', {'CONTAINER': song_li, 'song':song_li[0][0]['id']})
 
 
-
 @login_required
 def add_playlist(request):
     cur_user = playlist_user.objects.get(username = request.user)
@@ -77,7 +78,6 @@ def add_playlist(request):
         cur_user.playlist_song_set.create(song_title=request.POST['title'],song_dur=request.POST['duration'],
         song_albumsrc = song__albumsrc,
         song_channel=request.POST['channel'], song_date_added=request.POST['date'],song_youtube_id=request.POST['songid'])
-
 
 
 def signup(request):
@@ -116,4 +116,40 @@ def signup(request):
     return redirect('default')
   
   return render(request, 'signup.html', {'username':True, 'email':True})
-  
+
+
+class CustomAuthenticationForm(AuthenticationForm):
+    username = forms.CharField(
+        widget=forms.TextInput(
+          attrs={
+            "class": "form_input",
+            "placeholder": "Email or Username",
+            "pattern": "[A-Za-z0-9.@_-]+",
+            "required": "required",
+            "autocomplete": "username",
+            "autofocus": True,
+        })
+    )
+
+    password = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form_input",
+                "placeholder": "Password",
+                "required": "required",
+            'autofocus': True,
+        })
+    )
+
+class CustomLoginView(LoginView):
+    template_name = 'login.html'
+    authentication_form = CustomAuthenticationForm
+
+    def form_valid(self, form):
+        user = form.get_user()
+        login(self.request, user)
+        return redirect(reverse('default'))
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Invalid username or password.")
+        return super().form_invalid(form)
