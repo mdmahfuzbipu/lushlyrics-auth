@@ -138,7 +138,7 @@ class CustomAuthenticationForm(AuthenticationForm):
         widget=forms.TextInput(
           attrs={
             "class": "form_input",
-            "placeholder": "Email or Username",
+            "placeholder": "Username",
             "pattern": "[A-Za-z0-9.@_-]+",
             "required": "required",
             "autocomplete": "username",
