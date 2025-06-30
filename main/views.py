@@ -7,8 +7,13 @@ from django.contrib import messages
 from django.contrib.auth.views import LoginView
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
+from django.urls import reverse_lazy
+from django.contrib.auth.forms import UserCreationForm,AdminUserCreationForm
+from django.views.generic import FormView
+
 
 from .models import playlist_user
+from .forms import CustomSignupForm
 from django.urls.base import reverse
 from django.contrib.auth import authenticate,login,logout
 from youtube_search import YoutubeSearch
@@ -80,42 +85,52 @@ def add_playlist(request):
         song_channel=request.POST['channel'], song_date_added=request.POST['date'],song_youtube_id=request.POST['songid'])
 
 
-def signup(request):
-  if request.method == 'POST':
-    username = request.POST.get('username')
-    email = request.POST.get('email')
-    password = request.POST.get('password')
-    confirm_password = request.POST.get('confirm-password')
-    
-  
-    if password != confirm_password:
-      context = {'password-mismatch': True, 'username':True, 'email':True}
-      return render(request, 'signup.html', context)
-    
-    
-    if User.objects.filter(username=username).exists():
-      context = {'username': False, 'email':True}
-      return render(request, 'signup.html', context)
-    
-    if User.objects.filter(email=email).exists():
-      context = {'email': False, 'username':True}
-      return render(request, 'signup.html', context)
-    
-    
-    user = User.objects.create_user(username=username, email=email, password=password)
-    user.save()
-    
-    
-    auth_login(request, user)
-    
-    
-    from .models import playlist_user
-    playlist_user.objects.get_or_create(username=user.username)
-    
-    
-    return redirect('default')
-  
-  return render(request, 'signup.html', {'username':True, 'email':True})
+class SignUpView(FormView):
+    template_name = "signup.html"
+    form_class = CustomSignupForm
+    success_url = reverse_lazy("login")
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
+
+
+# def signup(request):
+#   if request.method == 'POST':
+#     username = request.POST.get('username')
+#     email = request.POST.get('email')
+#     password = request.POST.get('password')
+#     confirm_password = request.POST.get('confirm-password')
+
+
+#     if password != confirm_password:
+#       context = {'password-mismatch': True, 'username':True, 'email':True}
+#       return render(request, 'signup.html', context)
+
+
+#     if User.objects.filter(username=username).exists():
+#       context = {'username': False, 'email':True}
+#       return render(request, 'signup.html', context)
+
+#     if User.objects.filter(email=email).exists():
+#       context = {'email': False, 'username':True}
+#       return render(request, 'signup.html', context)
+
+
+#     user = User.objects.create_user(username=username, email=email, password=password)
+#     user.save()
+
+
+#     auth_login(request, user)
+
+
+#     from .models import playlist_user
+#     playlist_user.objects.get_or_create(username=user.username)
+
+
+#     return redirect('default')
+
+#   return render(request, 'signup.html', {'username':True, 'email':True})
 
 
 class CustomAuthenticationForm(AuthenticationForm):

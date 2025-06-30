@@ -12,5 +12,5 @@ urlpatterns = [
     
     path("login/", views.CustomLoginView.as_view(), name='login'),
     path("logout/", auth_views.LogoutView.as_view(next_page="/login/"), name='logout'),
-    path("signup/", views.signup) 
+    path("signup/", views.SignUpView.as_view(), name='signup'), 
 ]
