@@ -2,6 +2,8 @@ from django.http.response import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login as auth_login
+from django.contrib import messages
 
 from .models import playlist_user
 from django.urls.base import reverse
@@ -64,7 +66,7 @@ def search(request):
 
 
 
-
+@login_required
 def add_playlist(request):
     cur_user = playlist_user.objects.get(username = request.user)
 
@@ -75,3 +77,43 @@ def add_playlist(request):
         cur_user.playlist_song_set.create(song_title=request.POST['title'],song_dur=request.POST['duration'],
         song_albumsrc = song__albumsrc,
         song_channel=request.POST['channel'], song_date_added=request.POST['date'],song_youtube_id=request.POST['songid'])
+
+
+
+def signup(request):
+  if request.method == 'POST':
+    username = request.POST.get('username')
+    email = request.POST.get('email')
+    password = request.POST.get('password')
+    confirm_password = request.POST.get('confirm-password')
+    
+  
+    if password != confirm_password:
+      context = {'password-mismatch': True, 'username':True, 'email':True}
+      return render(request, 'signup.html', context)
+    
+    
+    if User.objects.filter(username=username).exists():
+      context = {'username': False, 'email':True}
+      return render(request, 'signup.html', context)
+    
+    if User.objects.filter(email=email).exists():
+      context = {'email': False, 'username':True}
+      return render(request, 'signup.html', context)
+    
+    
+    user = User.objects.create_user(username=username, email=email, password=password)
+    user.save()
+    
+    
+    auth_login(request, user)
+    
+    
+    from .models import playlist_user
+    playlist_user.objects.get_or_create(username=user.username)
+    
+    
+    return redirect('default')
+  
+  return render(request, 'signup.html', {'username':True, 'email':True})
+  
