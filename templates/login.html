@@ -129,6 +129,16 @@
         .signup-link a:hover {
             text-decoration: underline;
         }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #aaa;
+        }
+
     </style>
 </head>
 
@@ -157,6 +167,9 @@
             <div class="form-group">
                 <i class="fa fa-lock form_group_icon"></i>
                 {{ form.password }}
+                <span class="toggle-password" onclick="togglePassword('id_password', this)">
+                    <i class="fa fa-eye-slash"></i>
+                </span>
             </div>
 
             <button type="submit" class="btn_log_in">Log In</button>
@@ -170,6 +183,24 @@
             <p>Don't have an account? <a href="/signup">Sign Up for Lushlyrics</a></p>
         </div>
     </div>
+
+
+    <script>
+        function togglePassword(fieldId, iconSpan) {
+            const field = document.getElementById(fieldId);
+            const icon = iconSpan.querySelector('i');
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            }
+        }
+        </script>
+        
 </body>
 
 </html>
