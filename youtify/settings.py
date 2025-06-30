@@ -118,6 +118,9 @@ USE_TZ = True
 # Authentication
 LOGIN_URL = "/login/"
 
+# Email settings
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "noreply@lushlyrics.com"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
